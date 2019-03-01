@@ -1,6 +1,7 @@
 package everthing.core.dao;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import everthing.config.MyEverthingConfig;
 
 import javax.sql.DataSource;
 import java.io.*;
@@ -16,9 +17,6 @@ import java.sql.SQLException;
 public class DataSourceFactory {
     private static volatile DruidDataSource dataSource;
 
-    public DataSourceFactory() {
-    }
-
     /**
      * 获取数据源 - 懒汉式单例双重检查
      * @return
@@ -27,14 +25,17 @@ public class DataSourceFactory {
         if(dataSource == null){
             synchronized (DataSourceFactory.class){
                 if(dataSource == null){
-                    // 实例化DataSource
                     dataSource = new DruidDataSource();
                     dataSource.setDriverClassName("org.h2.Driver");
                     // url, username, password
-                    // 采用的是h2的嵌入式数据库，以本地文件方式存储，只需要提高url即可，不需要用户名和密码
-                    // 获取当前工程路径(user.home获取用户目录)
-                    String work = System.getProperty("user.dir");
-                    dataSource.setUrl("jdbc:h2:"+work+ File.separator+"my_everthing");
+                    // 采用的是h2的嵌入式数据库，以本地文件方式存储，只需要提供url即可，不需要用户名和密码
+                    dataSource.setUrl("jdbc:h2:"+MyEverthingConfig
+                            .getConfig().getH2Path());
+                    // Druid 数据库连接池的可配置参数
+                    // 第一种
+                    dataSource.setValidationQuery("select now()");
+                    // 第二种修改方式
+                    //dataSource.setTestWhileIdle(false);
                 }
             }
         }
@@ -78,9 +79,5 @@ public class DataSourceFactory {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args){
-        DataSourceFactory.initDatabase();
     }
 }

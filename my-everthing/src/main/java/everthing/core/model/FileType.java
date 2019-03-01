@@ -49,10 +49,4 @@ public enum FileType {
         }
         return FileType.OTHER;
     }
-
-    public static void main(String[] args){
-        System.out.println(FileType.findFileType("jpeg"));
-        System.out.println(FileType.findFileType("mp4"));
-        System.out.println(FileType.findFileType("doc"));
-    }
 }

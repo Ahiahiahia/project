@@ -20,4 +20,10 @@ public interface FileDatabaseDao {
      * 根据Condition条件进行数据库的检索
      */
     List<Thing> search(Condition condition);
+
+    /**
+     * 删除thing
+     * @param thing
+     */
+    void delete(Thing thing);
 }

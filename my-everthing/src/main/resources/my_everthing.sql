@@ -9,3 +9,5 @@ create table if not exists thing(
   depth int not null comment '文件路径深度',
   file_type varchar(32) not null comment '文件类型'
 );
+-- 数据库的索引的优化
+create index thing on thing(name);

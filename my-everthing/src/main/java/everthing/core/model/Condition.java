@@ -19,5 +19,5 @@ public class Condition {
      * 1.默认是true：asc    按照文件深度升序排列
      * 2.false：desc       按照文件深度降序排序
      */
-    private  Boolean orderByAsc;
+    private  Boolean orderByAsc = true;
 }

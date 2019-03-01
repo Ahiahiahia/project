@@ -1,6 +1,5 @@
 package everthing.core.dao.impl;
 
-import everthing.core.dao.DataSourceFactory;
 import everthing.core.dao.FileDatabaseDao;
 import everthing.core.model.Condition;
 import everthing.core.model.FileType;
@@ -24,6 +23,10 @@ public class FileDatabaseDaoImpl implements FileDatabaseDao {
         this.dataSource = dataSource;
     }
 
+    /**
+     * 对数据库的插入
+     * @param thing
+     */
     @Override
     public void insert(Thing thing) {
         Connection connection = null;       // 连接
@@ -49,6 +52,11 @@ public class FileDatabaseDaoImpl implements FileDatabaseDao {
         }
     }
 
+    /**
+     * 对数据库的查询
+     * @param condition
+     * @return
+     */
     @Override
     public List<Thing> search(Condition condition) {
         List<Thing> listThing = new ArrayList<>();
@@ -58,6 +66,7 @@ public class FileDatabaseDaoImpl implements FileDatabaseDao {
         try{
             // 1.获取数据库连接
             connection = dataSource.getConnection();
+
             // 2.准备SQL语句
             // 方法在栈上，线程独享，不存在线程安全问题
             StringBuilder sqlBuilder = new StringBuilder();
@@ -67,9 +76,7 @@ public class FileDatabaseDaoImpl implements FileDatabaseDao {
                     .append(" name like '%")
                     .append(condition.getName())
                     .append("%' ");
-            // file_type匹配
-//            System.out.println(condition.getFileType());
-
+            // file_type匹
             if(condition.getFileType() != null){
                 sqlBuilder.append(" and file_type = '")
                         .append(condition.getFileType().toUpperCase())
@@ -81,7 +88,6 @@ public class FileDatabaseDaoImpl implements FileDatabaseDao {
                     .append(" limit ")
                     .append(condition.getLimit())
                     .append(" offset 0 ");
-            System.out.println(sqlBuilder.toString());
 
             // 3.准备命令
             statement = connection.prepareStatement(sqlBuilder.toString());
@@ -104,6 +110,26 @@ public class FileDatabaseDaoImpl implements FileDatabaseDao {
             releaseResource(resultSet, statement, connection);
         }
         return listThing;
+    }
+
+    @Override
+    public void delete(Thing thing) {
+        Connection connection = null;       // 连接
+        PreparedStatement statement = null; // 命令
+        try{
+            // 1.获取数据库连接
+            connection = dataSource.getConnection();
+            // 2.准备SQL语句
+            String sql = "delete from thing where path like '"+thing.getPath()+ "%'";
+            // 3.准备命令
+            statement = connection.prepareStatement(sql);
+            // 4.执行命令
+            statement.execute();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }finally {
+            releaseResource(null, statement, connection);
+        }
     }
 
     // 重构 - 解决大量代码重复问题
@@ -129,28 +155,6 @@ public class FileDatabaseDaoImpl implements FileDatabaseDao {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    public static void main(String[] args) {
-        FileDatabaseDao fileDatabaseDao = new
-                FileDatabaseDaoImpl(DataSourceFactory.getDataSource());
-        Thing thing = new Thing();
-        thing.setName("简历");
-        thing.setPath("E:\\class\\简历\\简历.docx");
-        thing.setDepth(3);
-        thing.setFileType(FileType.DOC);
-//        fileDatabaseDao.insert(thing);
-
-        Condition connection = new Condition();
-        connection.setName("简历");
-        connection.setLimit(1);
-        connection.setOrderByAsc(true);
-        connection.setFileType("DOC");
-
-        List<Thing> list = fileDatabaseDao.search(connection);
-        for(Thing t : list){
-            System.out.println(t);
         }
     }
 }
